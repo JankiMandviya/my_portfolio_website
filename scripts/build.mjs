@@ -1,0 +1,16 @@
+import { cp, mkdir, rm, readFile, writeFile } from 'node:fs/promises';
+import { execFileSync } from 'node:child_process';
+const publicBuild = process.argv.includes('--public');
+const origin = 'https://jankimandviya.github.io/my_portfolio_website/';
+await rm('dist', { recursive: true, force: true });
+await mkdir('dist/assets', { recursive: true });
+await cp('public', 'dist', { recursive: true });
+await cp('src/app.js', 'dist/assets/app.js');
+let html = await readFile('src/index.html', 'utf8');
+html = html.replace('<!-- PUBLIC_META -->', publicBuild ? `<link rel="canonical" href="${origin}"><meta property="og:url" content="${origin}"><meta property="og:image" content="${origin}assets/social.png"><meta name="twitter:card" content="summary_large_image">` : '<meta name="robots" content="noindex,nofollow">');
+await writeFile('dist/index.html', html);
+await writeFile('dist/robots.txt', publicBuild ? `User-agent: *\nAllow: /\nSitemap: ${origin}sitemap.xml\n` : 'User-agent: *\nDisallow: /\n');
+if (publicBuild) await writeFile('dist/sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>${origin}</loc></url></urlset>`);
+await writeFile('dist/.nojekyll', '');
+execFileSync(process.execPath, ['node_modules/tailwindcss/lib/cli.js', '-c', 'tailwind.config.cjs', '-i', 'src/styles.css', '-o', 'dist/assets/styles.css', '--minify'], { stdio: 'inherit' });
+console.log(`Built ${publicBuild ? 'GitHub Pages' : 'private review'} output in dist/`);

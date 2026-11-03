@@ -1,0 +1,1 @@
+{"name":"janki-mandviya-portfolio","version":"1.0.0","private":true,"type":"module","scripts":{"build":"node scripts/build.mjs","check":"node scripts/check.mjs"},"devDependencies":{"tailwindcss":"3.4.17","linkedom":"0.18.12"}}
